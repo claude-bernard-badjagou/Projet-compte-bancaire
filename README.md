@@ -1,9 +1,9 @@
-### 1. De quoi traite ce projet
+### 1. A propos du projet
 
 Ce projet traite de **l’inclusion financière en Afrique de l’Est**.
 Il utilise un dataset de 33 600 individus avec des données démographiques (âge, genre, niveau d’éducation, emploi, taille du ménage, accès au téléphone, pays, etc.) afin d’**analyser et prédire la probabilité qu’une personne possède ou utilise un compte bancaire**.
 
-### 2. Quel est le problème à résoudre
+### 2. Problématique
 
 Le problème identifié est le **faible taux d’inclusion financière** dans plusieurs pays africains.
 De nombreuses personnes n’ont pas accès aux services bancaires, et il est difficile d’anticiper quels profils sont plus susceptibles d’ouvrir ou non un compte.
@@ -12,7 +12,7 @@ Le projet cherche donc à résoudre :
 * L’**identification des facteurs socio-démographiques** influençant la possession d’un compte bancaire.
 * La **construction d’un modèle prédictif fiable** pour évaluer la probabilité qu’un individu ouvre un compte bancaire.
 
-### 3. Quel est l’objectif atteint par ce projet
+### 3. Objectif
 
 L’objectif est de développer une **application interactive (Streamlit)** qui permet de :
 
