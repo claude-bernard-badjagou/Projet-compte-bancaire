@@ -212,22 +212,30 @@ def dataframe_vers_csv_bytes(df: pd.DataFrame) -> bytes:
     return tampon.getvalue().encode("utf-8")  # Retournons les octets encodés en UTF-8
 
 def dictionnaire_variables(donnees_fr: pd.DataFrame) -> pd.DataFrame:
-    """Construisons un mini dictionnaire de données (nom, type, % manquants, exemples)."""
-    # Préparons une liste pour collecter les méta-informations
-    lignes = []  # Initialisons un conteneur vide
-    # Parcourons chaque colonne pour en extraire les infos utiles
-    for nom_colonne in donnees_fr.columns:  # Itérons sur les colonnes
-        type_col = str(donnees_fr[nom_colonne].dtype)  # Récupérons le type pandas de la colonne
-        manquants = int(donnees_fr[nom_colonne].isna().sum())  # Comptons le nombre de valeurs manquantes
-        pct_manq = round(100 * manquants / len(donnees_fr), 2)  # Calculons le pourcentage de manquants
-        exemple = donnees_fr[nom_colonne].dropna().unique()[:3]  # Prenons quelques exemples de valeurs
-        lignes.append({  # Ajoutons une ligne d'information
+    """Construisons un dictionnaire de données (nom, type, % manquants, exemples) compatible Arrow/Streamlit."""
+    lignes = []
+    n = len(donnees_fr)
+    for nom_colonne in donnees_fr.columns:
+        # Type pandas en str (compatible Arrow)
+        type_col = str(donnees_fr[nom_colonne].dtype)
+        # Manquants
+        manquants = int(donnees_fr[nom_colonne].isna().sum())
+        pct_manq = round(100.0 * manquants / n, 2) if n else 0.0
+        # Exemples : on transforme la liste en chaîne lisible (pas d’objets/listes dans le DF final)
+        exemples = donnees_fr[nom_colonne].dropna().unique()[:3]
+        exemples_str = ", ".join(map(lambda x: str(x), exemples)) if len(exemples) else ""
+        lignes.append({
             "variable": nom_colonne,
             "type": type_col,
-            "valeurs_exemple": list(exemple),
+            "valeurs_exemple": exemples_str,  # <— chaîne, pas liste
             "manquants": manquants,
-            "%_manquants": pct_manq
+            "%_manquants": pct_manq,
         })
+    df_dic = pd.DataFrame(lignes)
+    # Par sécurité, forçons l’objet vers str si Arrow chipote encore
+    df_dic["valeurs_exemple"] = df_dic["valeurs_exemple"].astype(str)
+    return df_dic
+
     # Convertissons la liste en DataFrame structuré
     return pd.DataFrame(lignes)  # Retournons la table du dictionnaire
 
@@ -315,6 +323,8 @@ with onglets[0]:  # Entrons dans l’onglet Accueil
 with onglets[1]:  # Entrons dans l’onglet Exploration
     st.subheader("Aperçu des données")  # Affichons un sous-titre
     # Montrons les 10 premières lignes pour un aperçu rapide
+    dic_df = dictionnaire_variables(donnees_fr)
+    st.dataframe(dic_df, use_container_width=True)
     st.dataframe(donnees_fr.head(10), use_container_width=True)  # Présentons un échantillon des données
     # Ajoutons des stats descriptives numériques
     st.subheader("Statistiques descriptives (numériques)")  # Indiquons la section de stats
