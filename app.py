@@ -116,23 +116,23 @@ def separer_X_y(donnees_fr: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     X_entree = donnees_fr.drop(columns=["compte_bancaire", "identifiant_unique"], errors="ignore")  # Supprimons la cible et l’identifiant
     return X_entree, y_cible  # Retournons X et y
 
-def construire_transformeur(donnees_fr: pd.DataFrame) -> ColumnTransformer:
-    """Construisons un ColumnTransformer pour scaler les numériques et encoder les catégorielles."""
-    # Récupérons les colonnes numériques/catégorielles
-    types = colonnes_par_type(donnees_fr)  # Obtenons les listes de colonnes par type
-    # Définissons le pipeline numérique (scaling)
-    pipeline_numerique = StandardScaler()  # Standardisons les colonnes numériques
-    # Définissons le pipeline catégoriel (One-Hot)
-    pipeline_categoriel = OneHotEncoder(handle_unknown="ignore", sparse_output=False)  # Encodons les catégories
-    # Assemblons le transformeur par colonnes
-    transformeur = ColumnTransformer(  # Créons le transformeur multi-colonnes
-        transformers=[
-            ("num", pipeline_numerique, types.numeriques),  # Appliquons le scaler aux colonnes numériques
-            ("cat", pipeline_categoriel, types.categorielles),  # Appliquons l’encoder aux colonnes catégorielles
-        ],
-        remainder="drop"  # Supprimons toute autre colonne non listée
-    )
-    return transformeur  # Retournons le transformeur
+def construire_transformeur(X: pd.DataFrame) -> ColumnTransformer:
+    """Construisons un ColumnTransformer basé sur les colonnes présentes dans X (et pas le DF complet)."""
+    types = colonnes_par_type(X)
+
+    transformers = []
+    if types.numeriques:
+        transformers.append(("num", StandardScaler(), types.numeriques))
+    if types.categorielles:
+        # SMOTE exige du dense ; on garde OneHotEncoder en dense
+        transformers.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), types.categorielles))
+
+    if not transformers:
+        # Rien à transformer => levons une erreur explicite
+        raise ValueError("Aucune colonne exploitable pour l'entraînement (ni numérique ni catégorielle).")
+
+    return ColumnTransformer(transformers=transformers, remainder="drop")
+
 
 @st.cache_resource(show_spinner=True)  # Mémorisons la ressource entraînée (modèle) entre interactions
 def entrainer_modele(donnees_fr: pd.DataFrame) -> Bunch:
