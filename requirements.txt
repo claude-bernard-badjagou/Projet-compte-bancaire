@@ -9,7 +9,7 @@ imbalanced-learn==0.13.0
 joblib==1.4.2
 
 # Visualisation
-plotly==5.24.1
+plotly
 
 # Optionnel pour le profiling
 # ydata-profiling==4.12.1
