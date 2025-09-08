@@ -140,7 +140,7 @@ def entrainer_modele(donnees_fr: pd.DataFrame) -> Bunch:
     # Séparons X et y
     X_entree, y_cible = separer_X_y(donnees_fr)  # Préparons les entrées et la cible
     # Construisons le transformeur de colonnes
-    transformeur = construire_transformeur(donnees_fr)  # Créons le transformeur colonnes
+    transformeur = construire_transformeur(X_entree)  # Créons le transformeur colonnes
     # Instancions le classifieur RandomForest
     classifieur = RandomForestClassifier(  # Définissons le modèle final
         n_estimators=NB_ARBRES_RF,  # Fixons le nombre d’arbres
