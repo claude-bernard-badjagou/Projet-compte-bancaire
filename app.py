@@ -139,6 +139,13 @@ def entrainer_modele(donnees_fr: pd.DataFrame) -> Bunch:
     """Entraînons un modèle RandomForest dans un pipeline : prétraitement -> SMOTE -> RandomForest."""
     # Séparons X et y
     X_entree, y_cible = separer_X_y(donnees_fr)  # Préparons les entrées et la cible
+    if X_entree.shape[1] == 0:
+    raise ValueError(
+        "Aucune caractéristique disponible après séparation X/y. "
+        "Vérifiez les noms de colonnes et que seules 'compte_bancaire' et "
+        "'identifiant_unique' sont retirées de X."
+    )
+
     # Construisons le transformeur de colonnes
     transformeur = construire_transformeur(X_entree)  # Créons le transformeur colonnes
     # Instancions le classifieur RandomForest
